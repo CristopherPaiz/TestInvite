@@ -231,7 +231,7 @@
 
     <div class="container">
         <div class="card">
-            <h1 class="header">¡Salud por los 50 años!</h1>
+            <h1 class="header">¡Brindemos por los 50 años!</h1>
             
             <p class="intro-text">
                 Tenemos el agrado de invitarte a celebrar el cumpleaños en honor a nuestra querida madre
@@ -281,76 +281,88 @@
     </div>
 
     <script>
-        function getQueryParams() {
-            const params = new URLSearchParams(window.location.search);
-            const names = [];
-            
-            for (let [key, value] of params.entries()) {
-                if (key.startsWith('nombre')) {
-                    names.push(decodeURIComponent(value));
-                }
+    function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        const names = [];
+        
+        for (let [key, value] of params.entries()) {
+            if (key.startsWith('nombre')) {
+                names.push(decodeURIComponent(value));
             }
-            
-            const pase = params.get('pase') || names.length || 1;
-            return { names, pase };
+        }
+        
+        const pase = params.get('pase') || names.length || 1;
+        return { names, pase };
+    }
+
+    function formatNames(names) {
+        if (!names.length) return '';
+        if (names.length === 1) return names[0];
+        if (names.length === 2) {
+            // Si el último nombre comienza con "i", usa "e" en lugar de "y"
+            const lastName = names[1].toLowerCase();
+            if (lastName.startsWith('i')) {
+                return `${names[0]} e ${names[1]}`;
+            }
+            return `${names[0]} y ${names[1]}`;
+        }
+        
+        const lastPart = names.slice(-2);
+        const firstPart = names.slice(0, -2);
+
+        // Verificar el primer carácter del último nombre para el "e" en lugar de "y"
+        const lastName = lastPart[1].toLowerCase();
+        const conjunction = lastName.startsWith('i') ? 'e' : 'y';
+
+        return `${firstPart.join(', ')}, ${lastPart[0]} ${conjunction} ${lastPart[1]}`;
+    }
+
+    function showModal(names, paseCount) {
+        const modal = document.getElementById('modal');
+        document.getElementById('invitee-names').textContent = names;
+        document.getElementById('pass-count').textContent = paseCount;
+        modal.style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    function setupWhatsAppButton(names, paseCount) {
+        const whatsappBtn = document.getElementById('whatsappBtn');
+        const prefix = paseCount > 1 ? 'Nosotros' : 'Yo';
+        let message = '';
+        
+        if (names) {
+            message = `${prefix}, ${names}, acepto(amos) y confirmo(amos) la invitación`;
+        } else {
+            message = `${prefix} acepto(amos) y confirmo(amos) la invitación`;
+        }
+        
+        const encodedMessage = encodeURIComponent(message);
+        whatsappBtn.href = `https://wa.me/50238639275?text=${encodedMessage}`;
+    }
+
+    window.onload = function() {
+        const { names, pase } = getQueryParams();
+        const formattedNames = formatNames(names);
+        const paseCount = parseInt(pase) || 1;
+
+        if (names.length > 0) {
+            showModal(formattedNames, paseCount);
         }
 
-        function formatNames(names) {
-            if (!names.length) return '';
-            if (names.length === 1) return names[0];
-            if (names.length === 2) return `${names[0]} y ${names[1]}`;
-            
-            const lastPart = names.slice(-2);
-            const firstPart = names.slice(0, -2);
-            return `${firstPart.join(', ')}, ${lastPart[0]} y ${lastPart[1]}`;
-        }
+        setupWhatsAppButton(formattedNames, paseCount);
 
-        function showModal(names, paseCount) {
+        document.querySelector('.close').onclick = closeModal;
+
+        window.onclick = function(event) {
             const modal = document.getElementById('modal');
-            document.getElementById('invitee-names').textContent = names;
-            document.getElementById('pass-count').textContent = paseCount;
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        function setupWhatsAppButton(names, paseCount) {
-            const whatsappBtn = document.getElementById('whatsappBtn');
-            const prefix = paseCount > 1 ? 'Nosotros' : 'Yo';
-            let message = '';
-            
-            if (names) {
-                message = `${prefix}, ${names}, acepto(amos) y confirmo(amos) la invitación`;
-            } else {
-                message = `${prefix} acepto(amos) y confirmo(amos) la invitación`;
+            if (event.target == modal) {
+                closeModal();
             }
-            
-            const encodedMessage = encodeURIComponent(message);
-            whatsappBtn.href = `https://wa.me/50230369227?text=${encodedMessage}`;
         }
-
-        window.onload = function() {
-            const { names, pase } = getQueryParams();
-            const formattedNames = formatNames(names);
-            const paseCount = parseInt(pase) || 1;
-
-            if (names.length > 0) {
-                showModal(formattedNames, paseCount);
-            }
-
-            setupWhatsAppButton(formattedNames, paseCount);
-
-            document.querySelector('.close').onclick = closeModal;
-
-            window.onclick = function(event) {
-                const modal = document.getElementById('modal');
-                if (event.target == modal) {
-                    closeModal();
-                }
-            }
-        };
-    </script>
+    };
+</script>
 </body>
 </html>
